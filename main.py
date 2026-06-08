@@ -23,10 +23,31 @@ def main():
     gs=engine.GameState()
     load_images()
     running = True
+    sqSelected = ()# last click of the user (r,c)
+    playerClicks=[]# tracking the player cliks [(r,c),(r1,c1)]
     while running:
         for i in p.event.get():
             if i.type == p.QUIT:
                 running = False
+            elif i.type == p.MOUSEBUTTONDOWN:
+                location = p.mouse.get_pos()
+                c = location[0]//sq_size
+                r = location[1]//sq_size
+                if sqSelected == (r,c): #double select = undo
+                    sqSelected=()
+                    playerClicks=[]
+                else:
+                    sqSelected=(r,c) # FIRST AND SECOND CLICKS
+                    playerClicks.append(sqSelected)
+                #IS IT THE SECOND CLICK ?
+                if len(playerClicks)==2:
+                    move=engine.Move(playerClicks[0],playerClicks[1],gs.board)
+                    print(move.getChessNotation())
+                    gs.makeMove(move)
+                    sqSelected=()#reset user clicks
+                    playerClicks=[]
+
+
             clock.tick(max_fps)
             p.display.flip()
             drawGameState(screen, gs)
@@ -59,5 +80,3 @@ def drawPieces(screen,board ):
 
 if __name__ == '__main__':
     main()
-
-
